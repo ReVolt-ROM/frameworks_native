@@ -646,14 +646,13 @@ void SurfaceComposerClient::unblankDisplay(const sp<IBinder>& token) {
     ComposerService::getComposerService()->unblank(token);
 }
 
-// TODO: Remove me.  Do not use.
-// This is a compatibility shim for one product whose drivers are depending on
-// this legacy function (when they shouldn't).
+#if defined(TOROPLUS_RADIO)
 status_t SurfaceComposerClient::getDisplayInfo(
         int32_t displayId, DisplayInfo* info)
 {
     return getDisplayInfo(getBuiltInDisplay(displayId), info);
 }
+#endif
 
 #if defined(ICS_CAMERA_BLOB) || defined(MR0_CAMERA_BLOB)
 ssize_t SurfaceComposerClient::getDisplayWidth(int32_t displayId) {
@@ -677,6 +676,12 @@ ssize_t SurfaceComposerClient::getDisplayOrientation(int32_t displayId) {
 
 // ----------------------------------------------------------------------------
 
+#ifndef FORCE_SCREENSHOT_CPU_PATH
+#define SS_CPU_CONSUMER false
+#else
+#define SS_CPU_CONSUMER true
+#endif
+
 status_t ScreenshotClient::capture(
         const sp<IBinder>& display,
         const sp<IGraphicBufferProducer>& producer,
@@ -694,7 +699,7 @@ status_t ScreenshotClient::capture(
 #endif
     return s->captureScreen(display, producer,
             reqWidth, reqHeight, minLayerZ, maxLayerZ,
-            false);
+            SS_CPU_CONSUMER);
 }
 
 ScreenshotClient::ScreenshotClient()
